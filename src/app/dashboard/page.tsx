@@ -18,7 +18,7 @@ async function Page() {
 
   if(!dbUser) redirect('/auth-callback?origin=dashboard')
 
-  return  <Dashboard/>
+  return (<Dashboard/>) 
   
 }
 
