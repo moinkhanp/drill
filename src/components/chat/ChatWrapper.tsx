@@ -6,6 +6,7 @@ import Message from "./Message"
 import { ChevronLeft, Loader2, XCircle } from "lucide-react"
 import Link from "next/link"
 import { buttonVariants } from "../ui/button"
+import { ChatContextProvider } from "./ChatContext"
 
 interface ChatWrapperprops {
   fileId: string
@@ -58,7 +59,7 @@ function ChatWrapper({ fileId }: ChatWrapperprops) {
           <Link href='/dashboard'
             className={buttonVariants({
               variant: "secondary",
-              className:"mt-4"
+              className: "mt-4"
             })}>
             <ChevronLeft className="h-3 w-3 mr-1.5" />Back
           </Link>
@@ -69,14 +70,17 @@ function ChatWrapper({ fileId }: ChatWrapperprops) {
   )
 
   return (
-    <div className="relative min-h-full bg-zinc-50 flex flex-col justify-between gap-2 divide-y divide-zinc-200">
-      <div className="flex-1 justify-between flex flex-col mb-28">
-        <Message />
+    <ChatContextProvider fileId={fileId}>
+      <div className="relative min-h-full bg-zinc-50 flex flex-col justify-between gap-2 divide-y divide-zinc-200">
+        <div className="flex-1 justify-between flex flex-col mb-28">
+          <Message />
+        </div>
+
+        <ChatInput />
+
       </div>
+    </ChatContextProvider>
 
-      <ChatInput />
-
-    </div>
   )
 
 
