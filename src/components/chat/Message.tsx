@@ -17,7 +17,7 @@ function Message({ message, isNextMessageSamePerson }: MessageProps) {
             "justify-end": message.isUserMessage,
         })}>
 
-            <div className={cn("relative h-6 w-6 aspect-square items-center justify-center", {
+            <div className={cn("relative h-6 w-6 aspect-square flex  items-center justify-center", {
                 "order-2 bg-purple-600 rounded-sm": message.isUserMessage,
                 "order-2 bg-zinc-800 rounded-sm": !message.isUserMessage,
                 invisible: isNextMessageSamePerson
