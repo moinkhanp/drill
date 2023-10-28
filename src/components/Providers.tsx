@@ -15,7 +15,7 @@ const Providers = ({ children }: PropsWithChildren) => {
     trpc.createClient({
       links: [
         httpBatchLink({
-          url:'https://drillfile.vercel.app/api/trpc',
+          url:'/api/trpc',
         }),
       ],
     })
