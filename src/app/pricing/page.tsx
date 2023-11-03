@@ -53,7 +53,7 @@ function page() {
             quota: 25,
             features: [
                 {
-                    text: '25 pages per PDF',
+                    text: '100 pages per PDF',
                     footnote:
                         'The maximum amount of pages per PDF-file.',
                 },
