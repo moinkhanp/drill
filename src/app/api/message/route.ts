@@ -107,25 +107,25 @@ export const POST = async (req: NextRequest) => {
         ],
     })
 
-    setTimeout(async () => {
 
 
-        const stream = OpenAIStream(response, {
-            async onCompletion(completion) {
-                await db.message.create({
-                    data: {
-                        text: completion,
-                        isUserMessage: false,
-                        fileId,
-                        userId,
-                    },
-                })
-            },
-        })
 
-        return new StreamingTextResponse(stream)
+    const stream = OpenAIStream(response, {
+        async onCompletion(completion) {
+            await db.message.create({
+                data: {
+                    text: completion,
+                    isUserMessage: false,
+                    fileId,
+                    userId,
+                },
+            })
+        },
+    })
 
-    }, 30000);
+    return new StreamingTextResponse(stream)
+
+
 
 
 
