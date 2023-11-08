@@ -1,7 +1,0 @@
-{
-    "functions": {
-        "api/message.ts": {
-            "maxDuration": 30
-        }
-    }
-}
