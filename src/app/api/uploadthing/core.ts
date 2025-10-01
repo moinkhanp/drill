@@ -1,129 +1,128 @@
 import { db } from "@/db";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
-import { PDFLoader } from 'langchain/document_loaders/fs/pdf'
-import { OpenAIEmbeddings } from "langchain/embeddings/openai";
-import { PineconeStore } from "langchain/vectorstores/pinecone"
+import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
+import { PineconeStore } from "@langchain/pinecone";
 import { Pinecone } from "@pinecone-database/pinecone";
 import { getPineconeClient } from "@/lib/pinecone";
 import { getUserSubscriptionPlan } from "@/lib/stripe";
 import { PLANS } from "@/config/stripe";
+import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 
 const f = createUploadthing();
 
 const middleware = async () => {
-  const { getUser } = getKindeServerSession()
+  const { getUser } = getKindeServerSession();
   const user = getUser();
 
-  if (!user || !user.id) throw new Error("Unauthorized")
+  if (!user || !user.id) throw new Error("Unauthorized");
 
-  const subscriptionPlan = await getUserSubscriptionPlan()
+  const subscriptionPlan = await getUserSubscriptionPlan();
   return { subscriptionPlan, userId: user.id };
-}
+};
 
-const onUploadComplete = async ({ metadata, file }: {
-  metadata: Awaited<ReturnType<typeof middleware>>
+const onUploadComplete = async ({
+  metadata,
+  file,
+}: {
+  metadata: Awaited<ReturnType<typeof middleware>>;
   file: {
-    key: string
-    name: string
-    url: string
-  }
+    key: string;
+    name: string;
+    url: string;
+  };
 }) => {
-
   //prevent duplicate file
   const isFileExisted = await db.file.findFirst({
     where: {
-      key: file.key
-    }
-  })
+      key: file.key,
+    },
+  });
 
-  if (isFileExisted) return
+  if (isFileExisted) return;
 
   const createdFile = await db.file.create({
     data: {
       key: file.key,
       name: file.name,
       userId: metadata.userId,
-      url: `https://uploadthing-prod.s3.us-west-2.amazonaws.com/${file.key}`,
-      uploadStatus: 'PROCESSING',
+      url: `https://1rgnk1t84f.ufs.sh/f/${file.key}`,
+      uploadStatus: "PROCESSING",
     },
-  })
+  });
 
   try {
-    const response = await fetch(`https://uploadthing-prod.s3.us-west-2.amazonaws.com/${file.key}`)
-    const blob = await response.blob()
+    const response = await fetch(`https://1rgnk1t84f.ufs.sh/f/${file.key}`);
+    const blob = await response.blob();
 
-    const loader = new PDFLoader(blob)
+    const loader = new PDFLoader(blob);
 
-    const pageLevelDocs = await loader.load()
+    const pageLevelDocs = await loader.load();
 
-    const pageAmt = pageLevelDocs.length
+    const pageAmt = pageLevelDocs.length;
 
-    const { subscriptionPlan } = metadata
-    const { isSubscribed } = subscriptionPlan
+    const { subscriptionPlan } = metadata;
+    const { isSubscribed } = subscriptionPlan;
 
-    const isProExceeded = pageAmt > PLANS.find((plan) => plan.name === "PRO")!.pagesPerPdf
-    const isFreeExceeded = pageAmt > PLANS.find((plan) => plan.name === "FREE")!.pagesPerPdf
+    const isProExceeded =
+      pageAmt > PLANS.find((plan) => plan.name === "PRO")!.pagesPerPdf;
+    const isFreeExceeded =
+      pageAmt > PLANS.find((plan) => plan.name === "FREE")!.pagesPerPdf;
 
     if ((isSubscribed && isProExceeded) || (!isSubscribed && isFreeExceeded)) {
       await db.file.update({
         data: {
-          uploadStatus: "FAILED"
+          uploadStatus: "FAILED",
         },
         where: {
-          id: createdFile.id
-        }
-      })
+          id: createdFile.id,
+        },
+      });
     }
 
     //vectorize and index entire document
-    const pinecone = await getPineconeClient()
-    const pineconeIndex = pinecone.Index(process.env.PINECONE_INDEX!)
+    const pinecone = await getPineconeClient();
+    const pineconeIndex = pinecone.Index(process.env.PINECONE_INDEX!);
 
+   
 
-    const embeddings = new OpenAIEmbeddings({
-      openAIApiKey: process.env.OPENAI_API_KEY
-    })
+    const embeddings = new GoogleGenerativeAIEmbeddings({
+      apiKey: process.env.GEMINI_API_KEY,
+      model: 'gemini-embedding-001',
+    });
 
-    await PineconeStore.fromDocuments(
-      pageLevelDocs,
-      embeddings, {
+   
+
+    await PineconeStore.fromDocuments(pageLevelDocs, embeddings, {
       //@ts-ignore
       pineconeIndex,
-      //namespace: createdFile.id
-    }
-    );
+      namespace: createdFile.id,
+    });
 
     await db.file.update({
       data: {
-        uploadStatus: "SUCCESS"
+        uploadStatus: "SUCCESS",
       },
       where: {
-        id: createdFile.id
-      }
-
-    })
-
+        id: createdFile.id,
+      },
+    });
+    console.log('✅ Vectors stored successfully...')
   } catch (err) {
-
-
-
+    
+   // console.log('err',err)
     await db.file.update({
       data: {
-        uploadStatus: "FAILED"
+        uploadStatus: "FAILED",
       },
       where: {
-        id: createdFile.id
-      }
-
-    })
-
+        id: createdFile.id,
+      },
+    });
   }
-
-}
+};
 
 export const ourFileRouter = {
-
   freeplanUploader: f({ pdf: { maxFileSize: "4MB" } })
     .middleware(middleware)
     .onUploadComplete(onUploadComplete),

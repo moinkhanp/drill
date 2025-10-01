@@ -22,7 +22,7 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu'
 import PdfFullScreen from './PdfFullScreen'
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
 interface pdfRenderProps {
   url: string
@@ -39,6 +39,7 @@ function PdfRenderer({ url }: pdfRenderProps) {
     number | null
   >(null)
 
+  
   const isLoading = renderedScale !== scale
 
   const CustomPageValidator = z.object({

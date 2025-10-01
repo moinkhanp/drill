@@ -29,6 +29,8 @@ async function page({ params }: PageProps) {
         }
     })
 
+    // console.log("hi",file)
+
     if (!file) notFound()
 
     return (
