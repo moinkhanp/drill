@@ -195,7 +195,7 @@ export const appRouter = router({
       billing_address_collection: "required",
 
       //Optional but recommended
-      customer_email: user.email,
+      customer_email: dbUser?.email,
         
           metadata: {
             userId: userId,
