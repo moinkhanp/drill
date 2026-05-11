@@ -183,7 +183,6 @@ export const appRouter = router({
           cancel_url: billingUrl,
           payment_method_types: ['card'],
           mode: 'subscription',
-          billing_address_collection: 'auto',
           line_items: [
             {
               price: PLANS.find(
@@ -192,10 +191,10 @@ export const appRouter = router({
               quantity: 1,
             },
           ],
-           // ✅ THIS is required for India
+           //THIS is required for India
       billing_address_collection: "required",
 
-      // ✅ Optional but recommended
+      //Optional but recommended
       customer_email: user.email,
         
           metadata: {
