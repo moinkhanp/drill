@@ -148,61 +148,68 @@ export const appRouter = router({
   }),
 
   createStripeSession: privateProcedure.mutation(
-    async ({ ctx }) => {
-      const { userId } = ctx
+    async ({ ctx }) => 
+    {
+      try{
+        const { userId } = ctx
 
-      const billingUrl = absoluteUrl('/dashboard/billing')
-
-      if (!userId)
-        throw new TRPCError({ code: 'UNAUTHORIZED' })
-
-      const dbUser = await db.user.findFirst({
-        where: {
-          id: userId,
-        },
-      })
-
-      if (!dbUser)
-        throw new TRPCError({ code: 'UNAUTHORIZED' })
-
-      const subscriptionPlan = await getUserSubscriptionPlan()
-
-      if (
-        subscriptionPlan.isSubscribed &&
-        dbUser.stripeCustomerId
-      ) {
-        const stripeSession = await stripe.billingPortal.sessions.create({
-          customer: dbUser.stripeCustomerId,
-          return_url: billingUrl,
-        }) 
-        return { url: stripeSession.url }
-      }
- 
-      const stripeSession = await stripe.checkout.sessions.create({
-          success_url: billingUrl,
-          cancel_url: billingUrl,
-          payment_method_types: ['card'],
-          mode: 'subscription',
-          line_items: [
-            {
-              price: PLANS.find(
-                (plan) => plan.name === 'PRO'
-              )?.price.priceIds.test,
-              quantity: 1,
-            },
-          ],
-           //THIS is required for India
-      billing_address_collection: "required",
-
-      //Optional but recommended
-      customer_email: dbUser?.email,
-        
-          metadata: {
-            userId: userId,
+        const billingUrl = absoluteUrl('/dashboard/billing')
+  
+        if (!userId)
+          throw new TRPCError({ code: 'UNAUTHORIZED' })
+  
+        const dbUser = await db.user.findFirst({
+          where: {
+            id: userId,
           },
         })
-
-      return { url: stripeSession.url }
+  
+        if (!dbUser)
+          throw new TRPCError({ code: 'UNAUTHORIZED' })
+  
+        const subscriptionPlan = await getUserSubscriptionPlan()
+  
+        if (
+          subscriptionPlan.isSubscribed &&
+          dbUser.stripeCustomerId
+        ) {
+          const stripeSession = await stripe.billingPortal.sessions.create({
+            customer: dbUser.stripeCustomerId,
+            return_url: billingUrl,
+          }) 
+          return { url: stripeSession.url }
+        }
+   
+        const stripeSession = await stripe.checkout.sessions.create({
+            success_url: billingUrl,
+            cancel_url: billingUrl,
+            payment_method_types: ['card'],
+            mode: 'subscription',
+            line_items: [
+              {
+                price: PLANS.find(
+                  (plan) => plan.name === 'PRO'
+                )?.price.priceIds.test,
+                quantity: 1,
+              },
+            ],
+             //THIS is required for India
+        billing_address_collection: "required",
+  
+        //Optional but recommended
+        customer_email: dbUser?.email,
+          
+            metadata: {
+              userId: userId,
+            },
+          })
+  
+        return { url: stripeSession.url }
+      
+      }catch(error){
+        console.error('STRIPE ERROR:', error)
+        throw error
+      }
     }
   ),
 
