@@ -185,6 +185,7 @@ export const appRouter = router({
             cancel_url: billingUrl,
             payment_method_types: ['card'],
             mode: 'subscription',
+            customer: dbUser.stripeCustomerId || undefined,
             line_items: [
               {
                 price: PLANS.find(
