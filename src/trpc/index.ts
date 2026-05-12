@@ -185,6 +185,7 @@ export const appRouter = router({
             cancel_url: billingUrl,
             payment_method_types: ['card'],
             mode: 'subscription',
+            billing_address_collection: "required",
             customer: dbUser.stripeCustomerId || undefined,
             line_items: [
               {
@@ -194,10 +195,6 @@ export const appRouter = router({
                 quantity: 1,
               },
             ],
-             //THIS is required for India
-        billing_address_collection: "required",
-  
-       
             metadata: {
               userId: userId,
             },
