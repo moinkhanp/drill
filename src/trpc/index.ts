@@ -196,9 +196,7 @@ export const appRouter = router({
              //THIS is required for India
         billing_address_collection: "required",
   
-        //Optional but recommended
-        customer_email: dbUser?.email,
-          
+       
             metadata: {
               userId: userId,
             },
