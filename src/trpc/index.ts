@@ -214,7 +214,7 @@ export const appRouter = router({
         throw error
       }
     }
-  }),
-});
+  )
+})
 
 export type AppRouter = typeof appRouter;
