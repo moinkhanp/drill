@@ -7,12 +7,17 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function absoluteUrl(path: string) {
-  if (typeof window !== 'undefined') return path
-  if (process.env.NEXT_PUBLIC_APP_VERCEL_URL)
-    return `https://${process.env.NEXT_PUBLIC_APP_VERCEL_URL}${path}`
-  return `http://localhost:${
-    process.env.PORT ?? 3000
-  }${path}`
+  if (typeof window !== "undefined") return path;
+
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL ||
+    process.env.VERCEL_URL;
+
+  if (baseUrl) {
+    return `https://${baseUrl}${path}`;
+  }
+
+  return `http://localhost:${process.env.PORT ?? 3000}${path}`;
 }
 
 export function constructMetadata({
