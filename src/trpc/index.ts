@@ -179,7 +179,7 @@ export const appRouter = router({
           const stripeSession = await stripe.billingPortal.sessions.create({
             customer: dbUser.stripeCustomerId,
             return_url: billingUrl,
-          }) 
+          })  
           return { url: stripeSession.url }
         }
    
