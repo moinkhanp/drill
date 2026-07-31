@@ -23,7 +23,7 @@ function UploadDropzone({isSubscribed}:{isSubscribed:boolean}) {
     const { mutate: startPolling } = trpc.getFile.useMutation(
         {
             onSuccess: (file) => {
-                router.push(`/dashboard/${file.id}`)
+                router.push(`${process.env.NEXT_PUBLIC_APP_VERCEL_URL}/dashboard/${file.id}`)
             },
             retry: true,
             retryDelay: 500,
@@ -48,35 +48,64 @@ function UploadDropzone({isSubscribed}:{isSubscribed:boolean}) {
     }
 
     return (
-        <Dropzone multiple={false} onDrop={async (acceptedFile) => {
-            setIsUploading(true)
-            const progressInterval = startSimulatedProgress()
-
-            //handle file upload
-            const res = await startUpload(acceptedFile)
-            if (!res) {
+        <Dropzone
+          multiple={false}
+          onDrop={async (acceptedFile) => {
+            setIsUploading(true);
+            const progressInterval = startSimulatedProgress();
+        
+            try {
+              // Handle file upload
+              const res = await startUpload(acceptedFile);
+        
+              if (!res) {
+                clearInterval(progressInterval);
+                setIsUploading(false);
+        
                 toast({
-                    title: "Smothing went wrong",
-                    description: "please try again late",
-                    variant: "destructive"
-                })
-            }
-
-            const [fileResponse] = res!
-            const key = fileResponse?.key
-            if (!key) {
+                  title: "Something went wrong",
+                  description: "Please try again later.",
+                  variant: "destructive",
+                });
+        
+                return;
+              }
+        
+              const [fileResponse] = res;
+              const key = fileResponse?.key;
+        
+              if (!key) {
+                clearInterval(progressInterval);
+                setIsUploading(false);
+        
                 toast({
-                    title: "Smothhing went wrong",
-                    description: "please try again late",
-                    variant: "destructive"
-                })
+                  title: "Something went wrong",
+                  description: "Please try again later.",
+                  variant: "destructive",
+                });
+        
+                return;
+              }
+        
+              clearInterval(progressInterval);
+              setUploadProgress(100);
+        
+              startPolling({ key });
+            } catch (error) {
+              console.error("UploadThing Error:", error);
+        
+              clearInterval(progressInterval);
+              setIsUploading(false);
+        
+              toast({
+                title: "Upload failed",
+                description: "An unexpected error occurred. Please try again.",
+                variant: "destructive",
+              });
             }
-
-
-            clearInterval(progressInterval)
-            setUploadProgress(100)
-            startPolling({ key })
-        }}>
+          }}
+        >
+        
             {({ getRootProps, getInputProps, acceptedFiles }) => (
                 <div {...getRootProps()} className='border h-64 m-4 border-dashed border-gray-300 rounded-lg'>
                     <div className='flex items-center justify-center h-full w-full'>
