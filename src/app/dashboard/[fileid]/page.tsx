@@ -29,7 +29,7 @@ async function page({ params }: PageProps) {
         }
     })
 
-    // console.log("hi",file)
+    console.log("hi",file)
 
     if (!file) notFound()
 

@@ -39,6 +39,7 @@ const onUploadComplete = async ({
     name: string;
     url: string;
   };
+  
 }) => {
   //prevent duplicate file
   const isFileExisted = await db.file.findFirst({

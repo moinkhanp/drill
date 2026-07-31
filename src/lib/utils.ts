@@ -10,8 +10,7 @@ export function absoluteUrl(path: string) {
   if (typeof window !== "undefined") return path;
 
   const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL ||
-    process.env.VERCEL_URL;
+    process.env.NEXT_PUBLIC_APP_VERCEL_URL
 
   if (baseUrl) {
     return `https://${baseUrl}${path}`;
