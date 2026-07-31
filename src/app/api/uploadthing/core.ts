@@ -12,10 +12,18 @@ import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 const f = createUploadthing();
 
 const middleware = async () => {
+
+  console.log("UPLOADTHING MIDDLEWARE START"); 
+
   const { getUser } = getKindeServerSession();
   const user = await getUser();
 
-  if (!user || !user.id) throw new Error("Unauthorized");
+  console.log("UPLOAD USER:", user);
+
+  if (!user || !user.id) {
+    console.log("UPLOAD USER NOT FOUND");
+    throw new Error("Unauthorized");
+  }
 
   const subscriptionPlan = await getUserSubscriptionPlan();
   return { subscriptionPlan, userId: user.id };
