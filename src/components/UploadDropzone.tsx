@@ -23,6 +23,7 @@ function UploadDropzone({isSubscribed}:{isSubscribed:boolean}) {
     const { mutate: startPolling } = trpc.getFile.useMutation(
         {
             onSuccess: (file) => {
+                console.log("file",file)
                 router.push(`${process.env.NEXT_PUBLIC_APP_VERCEL_URL}/dashboard/${file.id}`)
             },
             retry: true,
