@@ -24,7 +24,7 @@ function UploadDropzone({isSubscribed}:{isSubscribed:boolean}) {
         {
             onSuccess: (file) => {
                 console.log("file",file)
-                router.push(`${process.env.NEXT_PUBLIC_APP_VERCEL_URL}/dashboard/${file.id}`)
+                router.push(`/dashboard/${file.id}`)
             },
             retry: true,
             retryDelay: 500,
