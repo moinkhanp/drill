@@ -16,7 +16,7 @@ const middleware = async () => {
   console.log("UPLOADTHING MIDDLEWARE START"); 
 
   const { getUser } = getKindeServerSession();
-  const user = await getUser();
+  const user = getUser();
 
   console.log("UPLOAD USER:", user);
 
